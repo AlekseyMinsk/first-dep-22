@@ -13,7 +13,7 @@ router.get('/additem', authMiddleware, controller.additem);
 router.get('/updateitem', authMiddleware, controller.updateitem);
 router.post('/removeitem', authMiddleware, controller.removeitem);
 
-router.get('/users', authMiddleware, controller.getUsers);
+router.get('/users', controller.getUsers);
 //router.get('/logOut', authMiddleware, controller.logOut);
 
 module.exports = router;
