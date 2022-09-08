@@ -11,9 +11,10 @@ const App = () => {
       <div className='App-background'>
         <BrowserRouter>
           <Routes>
-            <Route path="/login" exact element={<Login />}/>
-            <Route path="/register" exact element={<Register />}/>
-            <Route path="/dashboard" exact element={<Dashboard />}/>
+            <Route path='/' exact element={<Login />}/>
+            <Route path='/login' exact element={<Login />}/>
+            <Route path='/register' exact element={<Register />}/>
+            <Route path='/dashboard' exact element={<Dashboard />}/>
           </Routes>
         </BrowserRouter>
       </div>

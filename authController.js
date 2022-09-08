@@ -1,6 +1,5 @@
 const User = require('./models/user.js');
 const bcrypt = require('bcryptjs');
-
 const jwt = require('jsonwebtoken');
 const { secret, tokenName } = require('./config.js');
 
@@ -16,6 +15,7 @@ class authController {
     try {
       const {username, password} = request.body;
       const candidate = await  User.findOne({username});
+      console.log(candidate);
       if(candidate) {
         return response.status(400).json({message: "User already exists"})
       }
@@ -24,7 +24,17 @@ class authController {
         username: username,
         password: hashPassword
       })
-      return response.status(200).json({message: "User registered successfully"});
+      const token = generateAccessToken(username);
+      //console.log(token)
+      //return response.status(200).json({message: "User registered successfully"});
+      //const token = generateAccessToken(username); 
+      return response
+      .cookie(tokenName, token, {
+        expires: new Date(Date.now() + 864000000),
+        httpOnly: true
+      })
+      .status(200)
+      .json({ message: "User registered successfully"})
     } catch (e) {
       console.log('Registration error' + e)
       response.status(400).json({message: 'Registration error'})
@@ -69,9 +79,15 @@ class authController {
   } 
   async removeuser(request, response) {
       try {
-          // const users = await User.find();
-          // response.json(users);
-          
+        console.log('start')
+        const { username } = request.body;
+        const filter = { username: username };
+        const result =  await User.deleteOne(filter);
+        console.log(result)
+        return response
+          .clearCookie(tokenName)
+          .status(200)
+          .json({ message: "User removed" });          
       } catch (e) {
 
       }
@@ -98,57 +114,76 @@ class authController {
   }
   async getitems(request, response) {
       try {
-          //console.log('getitems');
-          //console.log(request.cookies);
-          // const users = await User.find();
-          //decodedData
           const username = request.username;
-          // console.log('tt');
-          // console.log(request.decodedData);
-          // console.log('tt');
-          response.json({ message: "Items successfully", user: username });
-          
+          const userDB = await User.findOne({username});
+          const user = {
+            userName: userDB.username,
+            items: userDB.quote
+          }
+          response.json({ message: "Items successfully", user: user });
       } catch (e) {
-
+        console.log(e);
       }
   }
 
   async additem(request, response) {
       try {
+        const { newItem } = request.body;
+        const username = request.username;
+
+        const filter = { username: username };
+        const result =  await User.updateOne(filter, 
+          {
+            $push: { quote: newItem }
+          }
+          );
+
+
+        
+        console.log(result);
+        return response.status(200).json({ message: 'Added' });
           // const users = await User.find();
           // response.json(users);
             //user.quote.push("strings!");
           
       } catch (e) {
-
+        console.log(e);
       }
   }
   async updateitem(request, response) {
       try {
           // const users = await User.find();
           // response.json(users);
+
+          // const result = await User.updateOne(filter,
+          //   { $set: { "quote.2" : 'xxx' } }
+          // )
+          // console.log(result);
+          // return response.status(200).json({ message: "Updated" });
       } catch (e) {
 
       }
   }
   async removeitem(request, response) {
       try {
-          
+        //itemToRemove
+        const { itemToRemove } = request.body;
+        const username = request.username;
+        const filter = { username: username };
+        const result =  await User.updateOne(filter, 
+          { $pull: { quote: { $in: [itemToRemove] } } }
+        )
+        response.json({ message: "Item removed successfully" });
       } catch (e) {
-
+        console.log(e);
       }
   }
   async getUsers(request, response) {
       try {
           const users = await User.find();
           response.json(users);
-          // const userRole = new Role();
-          // const adminRole = new Role({ value: "ADMIN"})
-          // await userRole.save();
-          // await adminRole.save();
-          //response.json('server work getUsers')
       } catch (e) {
-
+        console.log(e);
       }
   }
 }

@@ -6,13 +6,13 @@ module.exports = (request, response, next) => {
     const token = request.cookies[tokenName];
     const decodedData = jwt.verify(token, secret);
     request.username = decodedData.username;
-  next();
+    next();
   } catch (e) {
     console.log(request.route.path);
   //  if(request.route.path == "") { redirect if it not login or register
   //  }
     console.log(e);
-    return response.status(400).json({message: "Not authorized "})
+    return response.status(400).json({message: "Not authorized"})
   }
 }
 

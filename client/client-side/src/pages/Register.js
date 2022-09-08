@@ -41,12 +41,17 @@ function Register() {
     try {
       const res = await fetch('http://localhost:5000/auth/registration', {
         method: "post",
+        credentials: 'include',
         headers: {
           "Content-Type": "application/json",
           "Accept" : "*/*"
         },
         body: JSON.stringify(postData),
       });
+      const data = await res.json();
+      if(data.message) {
+        window.location = '/dashboard';
+      }
       console.log(res);
     } catch (error) {
       console.log(error);
